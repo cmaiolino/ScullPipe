@@ -50,12 +50,13 @@ extern int create_dev(void);
 extern void procfile_setup(void);
 
 /* this structure identifies each device into the driver */
-struct scull_dev {
-        struct scull_qset *data; /* Pointer to first quantum set */
-        int quantum;             /* the current quantum size */
-        int qset;                /* the current array size */
-        unsigned long size;      /* amount of data stored here */
-        unsigned int access_key; /* used by sculluid and scullpriv */
+struct scull_pipe {
+	wait_queue_head_t inq, outq; 		/* read and write queues */
+	char *buffer, *end;			/* begin of buf, end of buf */
+	int buffersize;				/* used in pointer arithmetic */
+	char *rp, *wp;				/* where to read, where to write */
+	int nreaders, nwriters;			/* number of opening for r/w */
+	struct fasync_struct *async_queue;	/*asynchronous readers */
         struct semaphore sem;    /* mutual exclusion semaphore */
         struct cdev cdev;        /* Char device structure */
 };
