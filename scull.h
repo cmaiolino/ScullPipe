@@ -49,7 +49,6 @@ extern int create_dev(void);
 
 /* this structure identifies each device into the driver */
 struct scull_pipe {
-<<<<<<< HEAD
 	wait_queue_head_t inq, outq; /* read and write queues */
 	char *buffer, *end; /* begin of buf, end of buf */
 	int buffersize; /* used in pointer arithmetic */
@@ -58,16 +57,6 @@ struct scull_pipe {
 	struct fasync_struct *async_queue; /*asynchronous readers */
         struct semaphore sem; /* mutual exclusion semaphore */
         struct cdev cdev; /* Char device structure */
-=======
-	wait_queue_head_t inq, outq; 		/* read and write queues */
-	char *buffer, *end;			/* begin of buf, end of buf */
-	int buffersize;				/* used in pointer arithmetic */
-	char *rp, *wp;				/* where to read, where to write */
-	int nreaders, nwriters;			/* number of opening for r/w */
-	struct fasync_struct *async_queue;	/*asynchronous readers */
-        struct semaphore sem;    /* mutual exclusion semaphore */
-        struct cdev cdev;        /* Char device structure */
->>>>>>> 1478bd666c619a4e5bbbd1beec5027f002d610e0
 };
 /* IOCTLs */
 
