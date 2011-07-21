@@ -17,8 +17,8 @@ endif
 EXTRA_CFLAGS+= $(DEBFLAGS)
 
 ifneq ($(KERNELRELEASE),)
-	scull-objs := devices.o fops.o main.o
-	obj-m := scull.o#module target to be compiled
+	scull_pipe-objs := devices.o fops.o main.o
+	obj-m := scull_pipe.o#module target to be compiled
 
 
 # Otherwise we were called directly from the command
@@ -35,4 +35,4 @@ default:
 endif
 
 clean:
-	rm -rf scull.ko devices.o fops.o .fops.cmd scull.mod.c scull.mod.o main.o modules.order Module.symvers scull.ko.unsigned .devices.o.cmd .fops.o.d .scull.ko.cmd .scull.ko.unsigned.cmd .main.mod.o.cmd .main.o.cmd .main.o.d .fops.o.cmd .tmp_versions/ .scull.mod.o.cmd .scull.o.cmd scull.o
+	rm -rf scull_pipe.ko devices.o fops.o .fops.cmd scull_pipe.mod.c scull_pipe.mod.o main.o modules.order Module.symvers scull_pipe.ko.unsigned .devices.o.cmd .fops.o.d .scull_pipe.ko.cmd .scull_pipe.ko.unsigned.cmd .main.mod.o.cmd .main.o.cmd .main.o.d .fops.o.cmd .tmp_versions/ .scull_pipe.mod.o.cmd .scull_pipe.o.cmd scull_pipe.o

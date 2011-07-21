@@ -1,6 +1,7 @@
 #include <linux/cdev.h>
 #include <linux/module.h>
 #include <linux/ioctl.h>
+#include <linux/wait.h>
 
 /* DEBUG */
 
@@ -27,14 +28,13 @@
 
 #define SCULL_NR_DEVS 4
 
-#define SCULL_QUANTUM 4000
-#define SCULL_QSET 1000
+#define SCULL_BUFFER 2048
 extern unsigned int scull_major;
 extern unsigned int scull_minor;
 extern unsigned int scull_nr_devs; /* number of devices */
 extern unsigned int scull_quantum;
 extern unsigned int scull_qset;
-extern struct scull_dev *scull_devices;
+extern struct scull_pipe *scull_devices;
 /* device number */
 /*dev_t dev;*/
  
@@ -45,32 +45,19 @@ extern struct scull_dev *scull_devices;
 extern struct file_operations scull_fops;
 
 /*int scull_open(struct inode *inode, struct file *filp);*/
-extern struct scull_qset *scull_follow(struct scull_dev *dev,int n);
 extern int create_dev(void);
-extern void procfile_setup(void);
 
 /* this structure identifies each device into the driver */
-struct scull_dev {
-        struct scull_qset *data; /* Pointer to first quantum set */
-        int quantum;             /* the current quantum size */
-        int qset;                /* the current array size */
-        unsigned long size;      /* amount of data stored here */
-        unsigned int access_key; /* used by sculluid and scullpriv */
-        struct semaphore sem;    /* mutual exclusion semaphore */
-        struct cdev cdev;        /* Char device structure */
+struct scull_pipe {
+	wait_queue_head_t inq, outq; /* read and write queues */
+	char *buffer, *end; /* begin of buf, end of buf */
+	int buffersize; /* used in pointer arithmetic */
+	char *rp, *wp; /* where to read, where to write */
+	/*int nreaders, nwriters;*/ /* number of opening for r/w */
+	struct fasync_struct *async_queue; /*asynchronous readers */
+        struct semaphore sem; /* mutual exclusion semaphore */
+        struct cdev cdev; /* Char device structure */
 };
-
-/* Member of linked list to keep track of device's data*/
-struct scull_qset {
-	void **data; /* Stores an array to quantum pointers */
-	struct scull_qset *next; /* Next list member */
-};
-
-
-/* proc file function prototypes */
-int scull_read_procmem(char *buf, char **start, off_t offset,
-                int count, int *eof, void *data);
-
 /* IOCTLs */
 
 /*sets the scull magic number*/
