@@ -10,12 +10,18 @@
 unsigned int scull_major = SCULL_MAJOR;
 unsigned int scull_minor = SCULL_MINOR;
 unsigned int scull_nr_devs = SCULL_NR_DEVS; /* number of devices */
-/*unsigned int scull_quantum = SCULL_QUANTUM;*/
-/*unsigned int scull_qset = SCULL_QSET;*/
 
 /* Device list */
 struct scull_pipe *scull_devices;
 
+/* This function is called whenever a cdev setup fail */
+
+static int scull_fail_dev(struct scull_pipe *dev)
+{
+	kfree(dev->buffer);
+	cdev_del(&dev->cdev);
+	return 0;
+}
 /* Create devices */
 static void scull_setup_cdev(struct scull_pipe *dev, int index)  /*dev struct not yet initialized into the code. FIXME*/ 
 {
@@ -26,17 +32,24 @@ static void scull_setup_cdev(struct scull_pipe *dev, int index)  /*dev struct no
 	dev->cdev.ops = &scull_fops;
 	init_waitqueue_head(&dev->inq);  /* Init read wait queue */
 	init_waitqueue_head(&dev->outq); /* Init write wait queue */
+
 	dev->buffer = kmalloc(SCULL_BUFFER, GFP_KERNEL);
+	if(!dev->buffer){
+		printk(KERN_NOTICE "Error allocating memory to device %d\n", index);
+		return;
+	}
+
 	dev->end = dev->buffer + SCULL_BUFFER;
 	dev->buffersize = SCULL_BUFFER;
 	dev->rp = dev->buffer;
 	dev->wp = dev->buffer;
-	err = cdev_add(&dev->cdev, devno, 1);
+
 	dev->async_queue = NULL; /* not in use yet */
 
-		 /*FIXME: should fail gracefully*/
+	err = cdev_add(&dev->cdev, devno, 1);
 	if(err)
-		printk(KERN_NOTICE "Error %d adding scull%d",err, index);
+		printk(KERN_NOTICE "Error %d adding scull%d. Cleaning",err, index);
+		scull_fail_dev(dev);
 }
 	
 
@@ -47,9 +60,13 @@ static int scull_init(void)
 	int i;
 
 	printk("Starting scull module...\n");
-	create_dev();
+	if(create_dev() < 0)
+		goto fail;
 
 	scull_devices = kmalloc(sizeof(struct scull_pipe) * scull_nr_devs,GFP_KERNEL);
+	if(!scull_devices)
+		goto fail;
+
 	memset(scull_devices,0,sizeof(struct scull_pipe)*scull_nr_devs);
 	
 	for(i=0; i<scull_nr_devs;i++){
@@ -58,6 +75,9 @@ static int scull_init(void)
 	}
 
 	return 0;
+
+	fail:
+		return -ENOMEM;		
 }
 
 static void scull_exit(void)
