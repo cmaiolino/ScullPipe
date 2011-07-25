@@ -147,6 +147,10 @@ static ssize_t scull_p_write(struct file *filp, const char __user *buf, size_t c
 	return count;
 }
 
+/* Temporary and badly commented, I'll fix the ioctl call 
+ * when I have time
+ */
+
 //int scull_p_ioctl(struct file *filp, unsigned int cmd, unsigned long arg){
 //
 //       int retval = 0, tmp, err = 0;
