@@ -7,6 +7,7 @@
 #include <linux/semaphore.h>
 #include <linux/sched.h>
 #include <linux/ioctl.h>
+#include <linux/poll.h>
 #include <asm/uaccess.h>
 #include "scull.h"
 
@@ -235,7 +236,30 @@ static ssize_t scull_p_write(struct file *filp, const char __user *buf, size_t c
 //        return retval;
 //
 //}
-		
+
+static unsigned int scull_p_poll(struct file *filp, struct poll_table *wait)
+{
+	struct scull_pipe *dev = filp->private_data;
+	unsigned int mask = 0;
+
+	/*
+ 	 * The buffer is circular; it is considered full
+ 	 * if "wp" is right behind "rp" and empty if
+ 	 * "wp" is equal "rp".
+ 	 */
+
+	down(&dev->sem);
+	poll_wait(filp, &dev->inq, wait);
+	poll_wait(filp, &dev->outq, wait);
+	
+	if (dev->rp != dev->wp)
+		mask |= (POLLIN | POLLRDNORM);
+	if (spacefree(dev))
+		mask |= (POLLOUT | POLLWRNORM);
+	up(&dev->sem);
+	return mask;
+}
+
 struct file_operations scull_fops = {
 	.owner = THIS_MODULE,
 	/*.llseek = scull_llseek,*/
