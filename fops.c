@@ -45,11 +45,39 @@ static int scull_getwritespace(struct scull_pipe *dev, struct file *filp)
 
 int scull_p_open(struct inode *inode, struct file *filp)
 {
+	printk(KERN_WARNING "Opening scull \n");
 	struct scull_pipe *dev; /* Device information */
-	
+	unsigned int flags = filp->f_flags;	
 	dev = container_of(inode->i_cdev, struct scull_pipe, cdev);
 	filp->private_data = dev; /* for other methods */
 
+        if ((flags & O_ACCMODE) == O_RDONLY){ /* PQ ACCMODE ??? */
+
+		dev->nreaders++;
+		if(!dev->nwriters){
+			if(flags & O_NONBLOCK)
+				return -EWOULDBLOCK;
+
+			if(wait_event_interruptible(dev->inq, dev->nwriters))
+				return -ERESTARTSYS;
+		}
+		goto out;
+	}
+
+	if (flags & O_WRONLY){
+		dev->nwriters++;
+		wake_up_interruptible(&dev->inq);
+		goto out;
+	}
+
+	if (flags & O_RDWR){
+		dev->nreaders++;
+		dev->nwriters++;
+		wake_up_interruptible(&dev->inq);
+		goto out;
+	}
+
+	out:
 	return 0; /*success*/
 }
 
@@ -66,6 +94,9 @@ static ssize_t scull_p_read(struct file *filp, char __user *buf, size_t count,
 
 	if(down_interruptible(&dev->sem))
 		return -ERESTARTSYS;
+
+	if(!dev->nwriters)
+		return 0; /*nothing being written, just return */
 
 	while(dev->rp == dev->wp) { /*Nothing to read*/
 		up(&dev->sem); /* release the lock */
@@ -237,16 +268,16 @@ static ssize_t scull_p_write(struct file *filp, const char __user *buf, size_t c
 //
 //}
 
-static unsigned int scull_p_poll(struct file *filp, struct poll_table *wait)
+/*static unsigned int scull_p_poll(struct file *filp, struct poll_table *wait)
 {
 	struct scull_pipe *dev = filp->private_data;
 	unsigned int mask = 0;
 
-	/*
+	*
  	 * The buffer is circular; it is considered full
  	 * if "wp" is right behind "rp" and empty if
  	 * "wp" is equal "rp".
- 	 */
+ 	 *
 
 	down(&dev->sem);
 	poll_wait(filp, &dev->inq, wait);
@@ -256,9 +287,11 @@ static unsigned int scull_p_poll(struct file *filp, struct poll_table *wait)
 		mask |= (POLLIN | POLLRDNORM);
 	if (spacefree(dev))
 		mask |= (POLLOUT | POLLWRNORM);
+	if (!dev->nwriters)
+		mask |= POLLHUP;
 	up(&dev->sem);
 	return mask;
-}
+}*/
 
 struct file_operations scull_fops = {
 	.owner = THIS_MODULE,
@@ -268,4 +301,5 @@ struct file_operations scull_fops = {
 	.open = scull_p_open,
 	.release = scull_p_release,
 	/*.unlocked_ioctl = scull_p_ioctl,*/
+	//.poll = scull_p_poll,
 };

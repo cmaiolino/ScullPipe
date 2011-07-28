@@ -53,7 +53,7 @@ struct scull_pipe {
 	char *buffer, *end; /* begin of buf, end of buf */
 	int buffersize; /* used in pointer arithmetic */
 	char *rp, *wp; /* where to read, where to write */
-	/*int nreaders, nwriters;*/ /* number of opening for r/w */
+	int nreaders, nwriters; /* number of opening for r/w */
 	struct fasync_struct *async_queue; /*asynchronous readers */
         struct semaphore sem; /* mutual exclusion semaphore */
         struct cdev cdev; /* Char device structure */
