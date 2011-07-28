@@ -32,7 +32,7 @@ static void scull_setup_cdev(struct scull_pipe *dev, int index)  /*dev struct no
 	dev->cdev.ops = &scull_fops;
 	init_waitqueue_head(&dev->inq);  /* Init read wait queue */
 	init_waitqueue_head(&dev->outq); /* Init write wait queue */
-
+	
 	dev->buffer = kmalloc(SCULL_BUFFER, GFP_KERNEL);
 	if(!dev->buffer){
 		printk(KERN_NOTICE "Error allocating memory to device %d\n", index);
@@ -43,6 +43,8 @@ static void scull_setup_cdev(struct scull_pipe *dev, int index)  /*dev struct no
 	dev->buffersize = SCULL_BUFFER;
 	dev->rp = dev->buffer;
 	dev->wp = dev->buffer;
+	dev->nwriters = 0;
+	dev->nreaders = 0;
 
 	dev->async_queue = NULL; /* not in use yet */
 
