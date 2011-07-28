@@ -45,7 +45,6 @@ static int scull_getwritespace(struct scull_pipe *dev, struct file *filp)
 
 int scull_p_open(struct inode *inode, struct file *filp)
 {
-	printk(KERN_WARNING "Opening scull \n");
 	struct scull_pipe *dev; /* Device information */
 	unsigned int flags = filp->f_flags;	
 	dev = container_of(inode->i_cdev, struct scull_pipe, cdev);
