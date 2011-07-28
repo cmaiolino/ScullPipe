@@ -178,105 +178,107 @@ static ssize_t scull_p_write(struct file *filp, const char __user *buf, size_t c
 	return count;
 }
 
-/* Temporary and badly commented, I'll fix the ioctl call 
+/* Temporary commented, I'll fix the ioctl call 
  * when I have time
  */
 
-//int scull_p_ioctl(struct file *filp, unsigned int cmd, unsigned long arg){
-//
-//       int retval = 0, tmp, err = 0;
-//
-//        /* extract the type and number bitfields, and don't
-//         * decode wrong cmds: return ENOTTY before access_ok()
-//         */
-//        if(_IOC_TYPE(cmd) != SCULL_IOC_MAGIC)
-//                return -ENOTTY;
-//
-//        if(_IOC_NR(cmd) > SCULL_IOC_MAXNR)
-//                return -ENOTTY;
-//
-//       /* the direction field is a bitmask (2 bits), and
-//        * VERIFY_WRITE catches R/W transfers. 'direction'
-//        * bitfield is user-oriented, while acces_ok() is
-//         * kernel-oriented, so the concept of "read" and
-//         * "write" is reversed
-//         */
-//
-//        /* access_ok() returns non-zero as success and 0
-//	 * as error
-//         */
-//
-//        if(_IOC_DIR(cmd) & _IOC_READ)
-//                err = !access_ok(VERIFY_WRITE, (void __user*)arg, _IOC_SIZE(cmd));
-//
-//        else if(_IOC_DIR(cmd) & _IOC_WRITE)
-//                err = !access_ok(VERIFY_READ, (void __user*)arg, _IOC_SIZE(cmd));
-//
-//        if(err)
-//                return -EFAULT;
-//
-//        switch(cmd){
-//
-//               case SCULL_IOCRESET:
-//                        scull_quantum = SCULL_QUANTUM;
-//                        scull_qset = SCULL_QSET;
-//                       break;
-//
-//                case SCULL_IOCSQUANTUM: /* Set: arg points to the value */
-//                        if(!capable(CAP_SYS_ADMIN))
-//                                return -EPERM;
-//
-//                        retval = __get_user(scull_quantum, (int __user*)arg);
-//                        break;
-//
-//                case SCULL_IOCTQUANTUM: /* Tell: arg is the value */
-//                        if(!capable(CAP_SYS_ADMIN))
-//                                return -EPERM;
-//
-//                        scull_quantum = arg;
-//                        break;
-//
-//                case SCULL_IOCGQUANTUM: /* Get: arg is pointer to result */
-//                        retval = __put_user(scull_quantum, (int __user*)arg);
-//                       break;
-//
-//                case SCULL_IOCQQUANTUM: /* Query: return it (it's positive) */
-//                        return scull_quantum;
-//
-//                case SCULL_IOCXQUANTUM: /* eXchange: use arg as pointer */
-//                        if(!capable(CAP_SYS_ADMIN))
-//                                return -EPERM;
-//                        tmp = scull_quantum;
-//                        retval = __get_user(scull_quantum, (int __user*)arg);
-//                        if(retval == 0)
-//                                retval = __put_user(tmp, (int __user *)arg);
-//                        break;
-//
-//                case SCULL_IOCHQUANTUM: /* sHift: like Tell + Query */
-//                        if(!capable(CAP_SYS_ADMIN))
-//                                return -EPERM;
-//                        tmp = scull_quantum;
-//                        scull_quantum = arg;
-//                       return tmp;
-//
-//                default: /* Redundant, as cmd was checked against MAXNR */
-//			return -ENOTTY;
-//			
-//        }
-//        return retval;
-//
-//}
+#if 0
+int scull_p_ioctl(struct file *filp, unsigned int cmd, unsigned long arg){
 
-/*static unsigned int scull_p_poll(struct file *filp, struct poll_table *wait)
+       int retval = 0, tmp, err = 0;
+
+        /* extract the type and number bitfields, and don't
+         * decode wrong cmds: return ENOTTY before access_ok()
+         */
+        if(_IOC_TYPE(cmd) != SCULL_IOC_MAGIC)
+                return -ENOTTY;
+
+        if(_IOC_NR(cmd) > SCULL_IOC_MAXNR)
+                return -ENOTTY;
+
+       /* the direction field is a bitmask (2 bits), and
+        * VERIFY_WRITE catches R/W transfers. 'direction'
+        * bitfield is user-oriented, while acces_ok() is
+         * kernel-oriented, so the concept of "read" and
+         * "write" is reversed
+         */
+
+        /* access_ok() returns non-zero as success and 0
+	 * as error
+         */
+
+        if(_IOC_DIR(cmd) & _IOC_READ)
+                err = !access_ok(VERIFY_WRITE, (void __user*)arg, _IOC_SIZE(cmd));
+
+        else if(_IOC_DIR(cmd) & _IOC_WRITE)
+                err = !access_ok(VERIFY_READ, (void __user*)arg, _IOC_SIZE(cmd));
+
+        if(err)
+                return -EFAULT;
+
+        switch(cmd){
+
+               case SCULL_IOCRESET:
+                        scull_quantum = SCULL_QUANTUM;
+                        scull_qset = SCULL_QSET;
+                       break;
+
+                case SCULL_IOCSQUANTUM: /* Set: arg points to the value */
+                        if(!capable(CAP_SYS_ADMIN))
+                                return -EPERM;
+
+                        retval = __get_user(scull_quantum, (int __user*)arg);
+                        break;
+
+                case SCULL_IOCTQUANTUM: /* Tell: arg is the value */
+                       if(!capable(CAP_SYS_ADMIN))
+                                return -EPERM;
+
+                        scull_quantum = arg;
+                        break;
+
+                case SCULL_IOCGQUANTUM: /* Get: arg is pointer to result */
+                        retval = __put_user(scull_quantum, (int __user*)arg);
+                       break;
+
+                case SCULL_IOCQQUANTUM: /* Query: return it (it's positive) */
+                        return scull_quantum;
+
+                case SCULL_IOCXQUANTUM: /* eXchange: use arg as pointer */
+                        if(!capable(CAP_SYS_ADMIN))
+                                return -EPERM;
+                        tmp = scull_quantum;
+                        retval = __get_user(scull_quantum, (int __user*)arg);
+                        if(retval == 0)
+                                retval = __put_user(tmp, (int __user *)arg);
+                        break;
+
+                case SCULL_IOCHQUANTUM: /* sHift: like Tell + Query */
+                        if(!capable(CAP_SYS_ADMIN))
+                                return -EPERM;
+                        tmp = scull_quantum;
+                        scull_quantum = arg;
+                       return tmp;
+
+                default: /* Redundant, as cmd was checked against MAXNR */
+			return -ENOTTY;
+	
+        }
+        return retval;
+
+}
+#endif
+
+static unsigned int scull_p_poll(struct file *filp, struct poll_table *wait)
 {
 	struct scull_pipe *dev = filp->private_data;
 	unsigned int mask = 0;
 
-	*
+	/*
  	 * The buffer is circular; it is considered full
  	 * if "wp" is right behind "rp" and empty if
  	 * "wp" is equal "rp".
- 	 *
+ 	 */
 
 	down(&dev->sem);
 	poll_wait(filp, &dev->inq, wait);
@@ -290,7 +292,7 @@ static ssize_t scull_p_write(struct file *filp, const char __user *buf, size_t c
 		mask |= POLLHUP;
 	up(&dev->sem);
 	return mask;
-}*/
+}
 
 struct file_operations scull_fops = {
 	.owner = THIS_MODULE,
@@ -300,5 +302,5 @@ struct file_operations scull_fops = {
 	.open = scull_p_open,
 	.release = scull_p_release,
 	/*.unlocked_ioctl = scull_p_ioctl,*/
-	//.poll = scull_p_poll,
+	.poll = scull_p_poll,
 };
