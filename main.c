@@ -49,9 +49,10 @@ static void scull_setup_cdev(struct scull_pipe *dev, int index)  /*dev struct no
 	dev->async_queue = NULL; /* not in use yet */
 
 	err = cdev_add(&dev->cdev, devno, 1);
-	if(err)
+	if(err){
 		printk(KERN_NOTICE "Error %d adding scull%d. Cleaning",err, index);
 		scull_fail_dev(dev);
+	}
 }
 	
 
