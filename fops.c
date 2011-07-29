@@ -50,7 +50,7 @@ int scull_p_open(struct inode *inode, struct file *filp)
 	dev = container_of(inode->i_cdev, struct scull_pipe, cdev);
 	filp->private_data = dev; /* for other methods */
 
-        if ((flags & O_ACCMODE) == O_RDONLY){ /* PQ ACCMODE ??? */
+        if ((flags & O_ACCMODE) == O_RDONLY){ 
 
 		dev->nreaders++;
 		if(!dev->nwriters){
