@@ -85,7 +85,16 @@ static int scull_init(void)
 
 static void scull_exit(void)
 {
+	int i = 0;
+
 	printk("Unloading scull module...\n");
+	if(scull_devices){
+		for(i=0;i<scull_nr_devs; i++){
+			printk(KERN_WARNING "removing dev %i..\n",i);
+			unregister_chrdev_region(scull_devices[i].cdev.dev, scull_nr_devs);
+			cdev_del(&scull_devices[i].cdev);
+		}
+	}
 }
 
 module_init(scull_init);
