@@ -46,7 +46,9 @@ static void scull_setup_cdev(struct scull_pipe *dev, int index)  /*dev struct no
 	dev->nwriters = 0;
 	dev->nreaders = 0;
 
-	dev->async_queue = NULL; /* not in use yet */
+	#if 0 
+	dev->async_queue = fasync_alloc();
+	#endif
 
 	err = cdev_add(&dev->cdev, devno, 1);
 	if(err){

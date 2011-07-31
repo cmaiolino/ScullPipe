@@ -80,11 +80,6 @@ int scull_p_open(struct inode *inode, struct file *filp)
 	return 0; /*success*/
 }
 
-/* Nothing special to do, since we don't have any hardware to shutdown for while */
-int scull_p_release(struct inode *inode, struct file *filp)
-{
-	return 0;
-}
 
 static ssize_t scull_p_read(struct file *filp, char __user *buf, size_t count,
 		loff_t *f_pos)
@@ -294,6 +289,20 @@ static unsigned int scull_p_poll(struct file *filp, struct poll_table *wait)
 	return mask;
 }
 
+static int scull_p_fasync(int fd, struct file *filp, int mode)
+{
+	struct scull_pipe *dev = filp->private_data;
+
+	return fasync_helper(fd, filp, mode, &dev->async_queue);
+}
+
+/* Nothing special to do, since we don't have any hardware to shutdown for while */
+int scull_p_release(struct inode *inode, struct file *filp)
+{
+	scull_p_fasync(-1, filp, 0);
+	return 0;
+}
+
 struct file_operations scull_fops = {
 	.owner = THIS_MODULE,
 	/*.llseek = scull_llseek,*/
@@ -303,4 +312,5 @@ struct file_operations scull_fops = {
 	.release = scull_p_release,
 	/*.unlocked_ioctl = scull_p_ioctl,*/
 	.poll = scull_p_poll,
+	.fasync = scull_p_fasync,
 };
