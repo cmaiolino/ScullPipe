@@ -5,6 +5,7 @@
 #include <linux/kdev_t.h>
 #include <linux/proc_fs.h>
 #include <linux/semaphore.h>
+#include <linux/slab.h> /* kmalloc, kfree */
 #include "scull.h"
 
 unsigned int scull_major = SCULL_MAJOR;
