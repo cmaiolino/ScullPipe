@@ -2,6 +2,7 @@
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/moduleparam.h> /* Parameters definition */
+#include <linux/slab.h> /* kmalloc, kfree */ 
 #include <linux/kdev_t.h>
 #include <linux/proc_fs.h>
 #include <linux/semaphore.h>
