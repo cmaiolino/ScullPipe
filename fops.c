@@ -8,7 +8,7 @@
 #include <linux/sched.h>
 #include <linux/ioctl.h>
 #include <linux/poll.h>
-#include <asm/uaccess.h>
+#include <linux/uaccess.h>
 #include "scull.h"
 
 static int spacefree(struct scull_pipe *dev){
@@ -264,7 +264,7 @@ int scull_p_ioctl(struct file *filp, unsigned int cmd, unsigned long arg){
 }
 #endif
 
-static unsigned int scull_p_poll(struct file *filp, struct poll_table *wait)
+static unsigned int scull_p_poll(struct file *filp, struct poll_table_struct *wait)
 {
 	struct scull_pipe *dev = filp->private_data;
 	unsigned int mask = 0;
