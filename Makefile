@@ -35,4 +35,4 @@ default:
 endif
 
 clean:
-	rm -rf scull_pipe.ko devices.o fops.o .fops.cmd scull_pipe.mod.c scull_pipe.mod.o main.o modules.order Module.symvers scull_pipe.ko.unsigned .devices.o.cmd .fops.o.d .scull_pipe.ko.cmd .scull_pipe.ko.unsigned.cmd .main.mod.o.cmd .main.o.cmd .main.o.d .fops.o.cmd .tmp_versions/ .scull_pipe.mod.o.cmd .scull_pipe.o.cmd scull_pipe.o
+	$(MAKE) -C $(KERNELDIR) M=$(PWD) clean
